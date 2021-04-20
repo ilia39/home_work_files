@@ -43,4 +43,27 @@ def parse_cb_while():
     return res_dict
 
 
-pp.pprint(parse_cb_for())
+def get_shop_list_by_dishes(dishes, person_count):
+    shop_list = {}
+    cook_book = parse_cb_for()
+    for dish in dishes:
+        if cook_book.get(dish) is None:
+            print(f'Блюдо "{dish}" отсутствует в книге рецептов')
+        else:
+            for ingredient in cook_book[dish]:
+                if ingredient['ingredient_name'] in shop_list:
+                    shop_list[ingredient['ingredient_name']]['quantity'] = \
+                        shop_list[ingredient['ingredient_name']]['quantity'] \
+                        + int(ingredient['quantity'])*person_count
+                else:
+                    shop_list.update({ingredient['ingredient_name']:
+                        {'measure': ingredient['measure'],
+                         'quantity': int(ingredient['quantity'])*person_count}})
+    return shop_list
+
+
+parsed_cook_book = parse_cb_for()
+pp.pprint(parsed_cook_book)
+shop_list = get_shop_list_by_dishes(['Запеченный картофель',
+                                     'Утка по-пекински', 'санкционная фуагра'], 2)
+pp.pprint(shop_list)
