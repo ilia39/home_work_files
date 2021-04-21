@@ -1,4 +1,37 @@
+import os
 import pprint as pp
+
+
+def concatenate_files():
+    tree = os.walk('.')
+    file_list = []
+    for element in tree:
+        if element[0] == '.':
+            for file in element[2]:
+                if file[-4:] == '.txt':
+                    file_list += [file]
+        else:
+            break
+    file_list.remove('cook_book.txt')
+    file_list.remove('res_file.txt')
+    res_file = os.path.join(os.getcwd(), 'res_file.txt')
+    with open(res_file, 'w') as clearer:
+        clearer.write('')
+    list_by_lines_count = []
+    for file in file_list:
+        path = os.path.join(os.getcwd(), file)
+        with open(path) as line_getter:
+            line_count = 0
+            for line in line_getter:
+                line_count += 1
+        list_by_lines_count.append([line_count, file])
+    list_by_lines_count.sort()
+    for file_info in list_by_lines_count:
+        with open(res_file, 'a') as to_file:
+            to_file.writelines([(file_info[1] + '\n'), (str(file_info[0]) + '\n')])
+            with open(os.path.join(os.getcwd(), file_info[1])) as from_file:
+                to_file.write(from_file.read())
+                to_file.write('\n')
 
 
 def parse_cb_for():
@@ -27,8 +60,7 @@ def parse_cb_for():
 def parse_cb_while():
     with open('cook_book.txt', 'r') as cook_book:
         res_dict = {}
-        end = False
-        while end is not True:
+        while True:
             name = cook_book.readline().strip()
             res_dict.update({name: []})
             cook_book.readline()
@@ -44,6 +76,8 @@ def parse_cb_while():
 
 
 def get_shop_list_by_dishes(dishes, person_count):
+    if person_count == 0:
+        return 'ничего покупать не надо'
     shop_list = {}
     cook_book = parse_cb_for()
     for dish in dishes:
@@ -54,16 +88,18 @@ def get_shop_list_by_dishes(dishes, person_count):
                 if ingredient['ingredient_name'] in shop_list:
                     shop_list[ingredient['ingredient_name']]['quantity'] = \
                         shop_list[ingredient['ingredient_name']]['quantity'] \
-                        + int(ingredient['quantity'])*person_count
+                        + int(ingredient['quantity']) * person_count
                 else:
                     shop_list.update({ingredient['ingredient_name']:
-                        {'measure': ingredient['measure'],
-                         'quantity': int(ingredient['quantity'])*person_count}})
+                                          {'measure': ingredient['measure'],
+                                           'quantity': int(ingredient['quantity']) * person_count}})
     return shop_list
 
 
 parsed_cook_book = parse_cb_for()
+# parsed_cook_book = parse_cb_while()
 pp.pprint(parsed_cook_book)
 shop_list = get_shop_list_by_dishes(['Запеченный картофель',
-                                     'Утка по-пекински', 'санкционная фуагра'], 2)
+                                     'Утка по-пекински', 'санкционная фуагра'], 0)
 pp.pprint(shop_list)
+concatenate_files()
